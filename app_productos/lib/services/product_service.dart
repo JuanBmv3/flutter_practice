@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:app_productos/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ProductService extends ChangeNotifier {
@@ -14,6 +15,8 @@ class ProductService extends ChangeNotifier {
   late Product selectedProduct;
   File? newPictureFile;
 
+  final storage = const FlutterSecureStorage();
+
   ProductService() {
     loadProducts();
   }
@@ -22,7 +25,7 @@ class ProductService extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json', {'auth': await storage.read(key: 'token') ?? ''});
     final res = await http.get(url);
 
     final Map<String, dynamic> productsMap = json.decode(res.body);

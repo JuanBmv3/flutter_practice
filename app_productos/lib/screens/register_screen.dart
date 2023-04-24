@@ -3,6 +3,8 @@ import 'package:app_productos/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/services.dart';
+
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({Key? key}) : super(key: key);
 
@@ -11,50 +13,48 @@ class RegisterScreen extends StatelessWidget {
     return Scaffold(
         body: AuthBackgroundScreen(
             child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 200,
-                  ),
-                  CardContainer(
-                    child: Column(children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        'Crear Cuenta',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ChangeNotifierProvider(
-                          create: (_) => LoginFormProvider(), child: _LoginForm()),
-                      MaterialButton(onPressed: () {})
-                    ]),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
-                    style: ButtonStyle(
-                      overlayColor: MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
-                      shape: MaterialStateProperty.all(const StadiumBorder())
-                    ),
-                    child: const Text(
-                      'Crear una nueva cuenta',
-                      style: TextStyle(fontSize: 18, color: Colors.black87),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ],
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 200,
+          ),
+          CardContainer(
+            child: Column(children: [
+              const SizedBox(
+                height: 10,
               ),
-            )
-          )
-        );
+              Text(
+                'Crear Cuenta',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              ChangeNotifierProvider(
+                  create: (_) => LoginFormProvider(), child: _LoginForm()),
+              MaterialButton(onPressed: () {})
+            ]),
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          TextButton(
+            onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
+            style: ButtonStyle(
+                overlayColor:
+                    MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
+                shape: MaterialStateProperty.all(const StadiumBorder())),
+            child: const Text(
+              'Crear una nueva cuenta',
+              style: TextStyle(fontSize: 18, color: Colors.black87),
+            ),
+          ),
+          const SizedBox(
+            height: 30,
+          ),
+        ],
+      ),
+    )));
   }
 }
 
@@ -123,15 +123,21 @@ class _LoginForm extends StatelessWidget {
                     ? null
                     : () async {
                         FocusScope.of(context).unfocus();
+                        final authService =
+                            Provider.of<AuthService>(context, listen: false);
+
                         if (!loginForm.isValidForm()) return;
 
                         loginForm.isLoading = true;
 
-                        await Future.delayed(const Duration(seconds: 2));
-
+                        final String? errorMessage = await authService
+                            .createUser(loginForm.email, loginForm.password);
+                        if (errorMessage == null) {
+                          Navigator.pushReplacementNamed(context, 'home');
+                        } else {
+                          print(errorMessage);
+                        }
                         loginForm.isLoading = false;
-
-                        Navigator.pushReplacementNamed(context, 'home');
                       },
                 child: Container(
                   padding:
